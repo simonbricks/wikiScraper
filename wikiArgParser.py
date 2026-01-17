@@ -3,43 +3,51 @@ import argparse
 
 class wikiParser():
     parser = argparse.ArgumentParser(
-        description='SporeScraper - analiza danych strony spore.fandom.com',
-        epilog='Szymon Cegłowski 2026, program zgodny z licencją CC-BY-SA')
+        description='SporeScraper - tool for spore.fandom wiki data analysis',
+        epilog='Szymon Cegłowski 2026, made using the CC-BY-SA licence')
 
     def __init__(self):
         self.parser.add_argument('--summary',
                                  type=str,
-                                 help='Fraza na wiki')
+                                 metavar='SEARCH PHRASE',
+                                 help='summarize a wiki page')
         self.parser.add_argument('--table',
                                  type=str,
-                                 help='Fraza na wiki')
+                                 metavar='SEARCH PHRASE',
+                                 help='fetch a table from the phrase page')
         self.parser.add_argument('--number',
                                  type=int,
-                                 help='Kolejność tabeli na stronie')
+                                 help='the order of the table on the page')
         self.parser.add_argument('--first-row-is-header',
                                  action='store_true',
-                                 help='Uwzględnienie nagłówków tabeli')
+                                 help='input the table including its headers')
         self.parser.add_argument('--count-words',
                                  type=str,
-                                 help='Fraza na wiki')
+                                 metavar='SEARCH PHRASE',
+                                 help='''create a JSON file with the frequency
+                                         of page word counts''')
         self.parser.add_argument('--analyze-relative-word-frequency',
                                  action='store_true',
-                                 help='Analiza częstości wyrazów strony')
+                                 help='analyze the word frequency on the page')
         self.parser.add_argument('--mode',
                                  type=str,
-                                 help='Możliwe wartości: [article, language]')
+                                 metavar='[\'article\', \'language\']',
+                                 help='''reference point of the analysis''')
         self.parser.add_argument('--chart',
                                  type=str,
-                                 help='Ścieżka do zapisania pliku')
+                                 metavar='FILEPATH',
+                                 help='make and save a word frequency chart')
         self.parser.add_argument('--auto-count-words',
                                  type=str,
-                                 help='Początkowa szukana fraza')
+                                 metavar='STARTING SEARCH PHRASE',
+                                 help='run --count-words on multiple pages')
         self.parser.add_argument('--depth',
                                  type=int,
-                                 help='Maksymalna głębokość strony od podanej')
+                                 help='''max depth of analyzed pages
+                                         from the starting one''')
         self.parser.add_argument('--wait',
                                  type=int,
-                                 help='Liczba sekund między --count-words')
+                                 help='seconds to wait between --count-words')
 
     def parse_args(self):
         return self.parser.parse_args()
