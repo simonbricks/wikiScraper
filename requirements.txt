@@ -1,0 +1,7 @@
+# plik zawiera biblioteki Pythonowe potrzebne do prawidłowego działania projektu wikiScraper
+argparse
+bs4
+requests
+pandas
+numpy
+matplotlib
