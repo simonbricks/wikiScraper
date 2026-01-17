@@ -5,3 +5,5 @@ requests
 pandas
 numpy
 matplotlib
+wordfreq
+pytest
