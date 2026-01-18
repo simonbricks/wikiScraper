@@ -1,8 +1,12 @@
 import argparse
-from wiki_classes import Args, FreqWordArgs, SummaryTableArgs, CountAndAutoArgs
+from assets.arg_classes import Args
+from assets.arg_classes import FreqWordArgs, SummaryTableArgs, WordCountArgs
 
-
-def parse_args() -> Args:
+"""
+Collects the command line arguments from the run instance of wiki_scraper.py
+and places then inside a general Args object.
+"""
+def collect_cmd_args() -> Args:
     parser = argparse.ArgumentParser(
         description='SporeScraper - tool for spore.fandom wiki data analysis',
         epilog='Szymon Cegłowski 2026, made using the CC-BY-SA licence')
@@ -23,6 +27,8 @@ def parse_args() -> Args:
 
     parser.add_argument('--first-row-is-header',
                         action='store_true',
+                        const=True,
+                        default=None,  # made to simplify the parsing process
                         help='input the table including its headers')
 
     parser.add_argument('--count-words',
@@ -33,6 +39,8 @@ def parse_args() -> Args:
 
     parser.add_argument('--analyze-relative-word-frequency',
                         action='store_true',
+                        const=True,
+                        default=None,
                         help='analyze the word frequency on the page')
 
     parser.add_argument('--mode',

@@ -1,8 +1,8 @@
-from wiki_argparser import WikiParser
+from modules.cmd_interface import collect_cmd_args
 
 def main():
-    wiki_parser = WikiParser()
-    args = wiki_parser.parse_args()
+    args = collect_cmd_args()
+
 
 if __name__ == "__main__":
     main()
