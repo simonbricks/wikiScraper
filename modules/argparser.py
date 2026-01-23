@@ -6,12 +6,14 @@ class WikiParser():
     def __init__(self, args: Args):
         self.args = args
 
-    """
-    Checks and confirms that the gathered command-line arguments
-    were input correctly.
-    Throws a parser error otherwise.
-    """
+    
     def _validate_args(self):
+        """
+        Checks and confirms that the gathered command-line arguments
+        were input correctly.
+        Throws a parser error otherwise.
+        """
+
         functionalities = [
             self.args.summary,
             self.args.table,
@@ -57,6 +59,12 @@ class WikiParser():
                                         --mode and --count arguments to
                                         exist and be valid""")
 
+        if not self.args.mode in [None, "article", "language"]:
+            raise ArgValidationError("""The --mode argument's value
+                                        is incorrect.
+                                        Make sure it's either 'article'
+                                        or 'language'.""")
+
         arg_acw = self.args.auto_count_words
         arg_depth = self.args.depth
         arg_wait = self.args.wait
@@ -69,10 +77,8 @@ class WikiParser():
                                         --depth and --wait are codependent,
                                         use all of them""")
 
-    """
-    Parses and returns the command-line arguments
-    to other modules.
-    """
+
     def parse_args(self):
+        """Parses and returns the command-line arguments to other modules."""
         self._validate_args()
         return self.args

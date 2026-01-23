@@ -2,6 +2,7 @@
 argparse
 bs4
 requests
+pathlib
 pandas
 numpy
 matplotlib

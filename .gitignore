@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+# Ignore pytest cache files
+.pytest_cache/
+
 # Ignore .vscode folder
 .vscode/
 

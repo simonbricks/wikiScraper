@@ -2,11 +2,13 @@ import argparse
 from assets.arg_classes import Args
 from assets.arg_classes import FreqWordArgs, SummaryTableArgs, WordCountArgs
 
-"""
-Collects the command line arguments from the run instance of wiki_scraper.py
-and places then inside a general Args object.
-"""
+
 def collect_cmd_args() -> Args:
+    """
+    Collects the command line arguments from the run instance of wiki_scraper.py
+    and places then inside a general Args object.
+    """
+    
     parser = argparse.ArgumentParser(
         description='SporeScraper - tool for spore.fandom wiki data analysis',
         epilog='Szymon Cegłowski 2026, made using the CC-BY-SA licence')
