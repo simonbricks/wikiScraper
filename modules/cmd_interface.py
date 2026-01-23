@@ -29,7 +29,6 @@ def collect_cmd_args() -> Args:
 
     parser.add_argument('--first-row-is-header',
                         action='store_true',
-                        const=True,
                         default=None,  # made to simplify the parsing process
                         help='input the table including its headers')
 
@@ -41,14 +40,18 @@ def collect_cmd_args() -> Args:
 
     parser.add_argument('--analyze-relative-word-frequency',
                         action='store_true',
-                        const=True,
                         default=None,
                         help='analyze the word frequency on the page')
 
     parser.add_argument('--mode',
                         type=str,
                         metavar='[\'article\', \'language\']',
-                        help='''reference point of the analysis''')
+                        help='reference point of the analysis')
+
+    parser.add_argument('--count',
+                        type=str,
+                        metavar='NUMBER',
+                        help='how many words from the wiki will be compared')
 
     parser.add_argument('--chart',
                         type=str,
@@ -72,7 +75,7 @@ def collect_cmd_args() -> Args:
     args = parser.parse_args()
 
     return Args(
-        summary_args=SummaryTableArgs(
+        summary_table_args=SummaryTableArgs(
             summary=args.summary,
             table=args.table,
             number=args.number,
@@ -84,7 +87,7 @@ def collect_cmd_args() -> Args:
             count=args.count,
             chart=args.chart
         ),
-        count_args=CountAndAutoArgs(
+        count_args=WordCountArgs(
             count_words=args.count_words,
             auto_count_words=args.auto_count_words,
             depth=args.depth,

@@ -1,5 +1,5 @@
 from assets.arg_classes import Args
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, NavigableString, Tag
 
 from modules.scraper import Scraper
 
@@ -17,8 +17,39 @@ class Controller:
         self.args = args
 
 
+    def _get_page_contents(self, wiki_url: str, search_phrase: str):
+        """
+        Returns a BeautifulSoup of the contents of the searched wiki page.
+        """
+
+        scraper = Scraper(wiki_url, search_phrase)
+        page_html = scraper.scrape()
+
+        soup = BeautifulSoup(page_html, "html.parser")
+        content = soup.find("div", attrs={"class": "mw-content-ltr"})
+
+        return content
+
+
     def summarize(self):
-        pass
+        """
+        Module responsible for the --summary functionality,
+        downloads the wiki page source code and prints out its summary.
+        """
+
+        content = self._get_page_contents(
+            wiki_url=SPORE_FANDOM_URL,
+            search_phrase=self.args.summary
+        )
+        
+        # getting rid of the infobox that is inside the <p> tag
+        infobox = content.find("aside", attrs={"class": "portable-infobox"})
+        infobox.extract()
+
+        first_p = content.find("p")
+        summary_text = first_p.text.strip('\n')  # unnecessary indents
+
+        return summary_text
 
 
     def save_table(self):

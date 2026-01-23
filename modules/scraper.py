@@ -20,10 +20,10 @@ class Scraper:
         self.use_local_html = use_local_html_file_instead
 
 
-    def scrape(self) -> BeautifulSoup:
+    def scrape(self) -> str:
         """
         Scrapes wiki page's source code
-        and passes it onto the controller module.
+        and passes the html code onto the controller module.
 
         Assumption: 
             - If an HTML file exists,
@@ -32,17 +32,12 @@ class Scraper:
         """
 
         if self.use_local_html:  # taking the source code from a local file
-            root_dir = Path(__file__).resolve().parent
-            html_files = list(root_dir.glob("*.html"))
+            root_dir = Path.cwd()
+            html_files = list(root_dir.glob(f"{self.search_phrase}.html"))
 
             if not html_files:
                 raise HTMLFileError("""No HTML file found in the 
                                        root directory of the project.""")
-
-            if len(html_files) > 1: 
-                raise HTMLFileError("""There should be only one HTML file in
-                                       the project root directory, but there
-                                       are multiple.""")
 
             page_text = html_files[0].read_text(encoding="utf-8")
 
@@ -64,5 +59,6 @@ class Scraper:
             if soup.find("div", attrs={"class": "noarticletext"}):
                 raise PageValidationError(f"""The wiki page for the search
                                               phrase {self.search_phrase}
-                                              doesn't exist.""")        
-        return soup
+                                              doesn't exist.""")    
+    
+        return page_text

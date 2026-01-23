@@ -25,28 +25,8 @@ def test_no_file():
         assert True
 
 
-def test_too_many_files():
-    file1 = open("awwkward1.html", "w")
-    file2 = open("creature_stage2.html", "w")
-
-    scraper = Scraper(
-        wiki_url=SPORE_FANDOM_URL,
-        search_phrase="Cell Stage",
-        use_local_html_file_instead=True
-    )
-
-    try:
-        scraper.scrape()
-        assert False
-    except HTMLFileError:
-        assert True
-
-    os.remove("awwkward1.html")
-    os.remove("creature_stage2.html")
-
-
 def test_empty_file():
-    file = open("awwkward1.html", "x")
+    file = open("awwkward.html", "w")
 
     scraper = Scraper(
         wiki_url=SPORE_FANDOM_URL,
@@ -59,9 +39,36 @@ def test_empty_file():
         assert False
     except HTMLFileError:
         assert True
-    
-    os.remove("awwkward1.html")
 
+    os.remove("awwkward.html")
+
+
+def test_valid_file():
+    file = open("test_file.html", "w")
+    file.write("""
+        <h1>This is an HTML file</h1>
+        <p>Or at least, it pretends to be so.</p>
+        <h6>Actually it would need some more tags like <'head'></h6>
+        """)
+    file.close()
+
+    scraper = Scraper(
+        wiki_url=SPORE_FANDOM_URL,
+        search_phrase="test_file",
+        use_local_html_file_instead=True
+    )
+
+    try:
+        html_text = scraper.scrape()
+    except Exception:
+        assert False
+
+    if html_text:
+        assert True
+    else:
+        assert False
+
+    os.remove("test_file.html")
 
 def test_nonexistent_page():
     scraper = Scraper(
@@ -83,11 +90,11 @@ def test_valid_page():
     )
 
     try:
-        soup = scraper.scrape()
+        html_text = scraper.scrape()
     except Exception:
         assert False
     
-    if soup.text:
+    if html_text:
         assert True
     else:
         assert False

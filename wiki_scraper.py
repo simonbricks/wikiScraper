@@ -3,9 +3,9 @@ from modules.controller import Controller
 
 def main():
     args = collect_cmd_args()
-    
+
     controller = Controller(args)
-    controller.run()
+    controller.summarize()
     
 
 if __name__ == "__main__":

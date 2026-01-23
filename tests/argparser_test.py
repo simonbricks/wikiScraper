@@ -49,7 +49,7 @@ def test_incorrect_mode_value():
             first_row_is_header=True
         ),
         FreqWordArgs(
-            analyze_relative_word_frequency=True,
+            analyze_relative_word_fq=True,
             mode="artikel",  # wrong
             count=5,
             chart="some_filepath"
@@ -122,7 +122,7 @@ def test_correct_args2():
             first_row_is_header=True
         ),
         FreqWordArgs(
-            analyze_relative_word_frequency=True,
+            analyze_relative_word_fq=True,
             mode="article",
             count=5,
             chart="some_filepath"

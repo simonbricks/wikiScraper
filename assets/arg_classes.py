@@ -19,9 +19,9 @@ A class of arguments for the WikiParser concerning the
 --analyze-relative-word-frequency functionality.
 """
 class FreqWordArgs():
-    def __init__(self, analyze_relative_word_frequency: bool = None,
+    def __init__(self, analyze_relative_word_fq: bool = None,
                  mode: str = None, count: int = None, chart: str = None):
-        self.analyze_relative_word_fq = analyze_relative_word_frequency
+        self.analyze_relative_word_fq = analyze_relative_word_fq
         self.mode = mode
         self.count = count
         self.chart = chart
@@ -50,18 +50,21 @@ class Args():
                  freq_args: FreqWordArgs = None,
                  count_args: WordCountArgs = None):
         # unpacking the collected arguments
-        self.summary = summary_table_args.summary
-        self.table = summary_table_args.table
-        self.number = summary_table_args.number
-        self.first_row_is_header = summary_table_args.first_row_is_header
+        if summary_table_args:
+            self.summary = summary_table_args.summary
+            self.table = summary_table_args.table
+            self.number = summary_table_args.number
+            self.first_row_is_header = summary_table_args.first_row_is_header
 
-        self.count_words = count_args.count_words
+        if count_args:
+            self.count_words = count_args.count_words
 
-        self.analyze_relative_word_fq = freq_args.analyze_relative_word_fq
-        self.mode = freq_args.mode
-        self.count = freq_args.count
-        self.chart = freq_args.chart
+            self.auto_count_words = count_args.auto_count_words
+            self.depth = count_args.depth
+            self.wait = count_args.wait
 
-        self.auto_count_words = count_args.auto_count_words
-        self.depth = count_args.depth
-        self.wait = count_args.wait
+        if freq_args:
+            self.analyze_relative_word_fq = freq_args.analyze_relative_word_fq
+            self.mode = freq_args.mode
+            self.count = freq_args.count
+            self.chart = freq_args.chart
