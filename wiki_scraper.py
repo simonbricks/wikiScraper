@@ -5,7 +5,7 @@ def main():
     args = collect_cmd_args()
 
     controller = Controller(args)
-    controller.summarize()
+    controller.run()
     
 
 if __name__ == "__main__":
