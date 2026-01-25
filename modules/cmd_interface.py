@@ -1,4 +1,5 @@
 import argparse
+from modules.argparser import WikiParser
 from assets.arg_classes import Args
 from assets.arg_classes import FreqWordArgs, SummaryTableArgs, WordCountArgs
 
@@ -74,7 +75,7 @@ def collect_cmd_args() -> Args:
 
     args = parser.parse_args()
 
-    return Args(
+    collected_args = Args(
         summary_table_args=SummaryTableArgs(
             summary=args.summary,
             table=args.table,
@@ -94,3 +95,9 @@ def collect_cmd_args() -> Args:
             wait=args.wait
         )
     )
+
+    # checking the validity of collected arguments
+    parser = WikiParser(collected_args)
+    parser.parse_args()
+
+    return collected_args

@@ -125,7 +125,7 @@ def test_correct_args2():
             analyze_relative_word_fq=True,
             mode="article",
             count=5,
-            chart="some_filepath"
+            chart="file.png"
         ),
         WordCountArgs(
             count_words="Aawkwaard",

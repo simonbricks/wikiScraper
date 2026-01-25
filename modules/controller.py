@@ -9,6 +9,7 @@ import time  # for time.sleep()
 
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt  # for bar graph plotting
 
 from wordfreq import top_n_list, word_frequency
 
@@ -180,6 +181,8 @@ class Controller:
             columns=cols
         )
 
+        print(df)
+
         # setting up the first column of the table as an index
         df.set_index(df.columns[0], inplace=True)
         
@@ -244,12 +247,58 @@ class Controller:
             f.write(word_count_json)
 
 
+    def _create_bar_chart(self, df: pd.DataFrame):
+        """
+        Creates a bar chart based on the collected word frequency
+        comparison table and saves it in the file path given by the
+        --chart argument.
+        """
+
+        categories = df["Word"]
+        article_group = df["Frequency in article"]
+        wiki_group = df["Frequency in wiki language"]
+
+        bar_width = 0.35
+
+        r_article = np.arange(len(article_group))
+        r_wiki = [x + bar_width for x in r_article]
+
+        plt.bar(
+            r_article,
+            article_group,
+            color="red",
+            width=bar_width,
+            label="Frequency in wiki articles"
+        )
+
+        plt.bar(
+            r_wiki,
+            wiki_group,
+            color="blue",
+            width=bar_width,
+            label="Frequency in wiki language"
+        )
+
+        plt.xlabel("Words compared", fontweight="bold")
+        plt.xticks(
+            [r + 0.5*bar_width for r in range(len(article_group))],
+            categories,
+            rotation=45
+        )
+
+        plt.ylabel("Frequency", fontweight="bold")
+        plt.title("Frequency comparison for words")
+        plt.legend()
+
+        plt.savefig(self.args.chart, bbox_inches="tight")
+
+
     def analyze_relative_word_fq(self):
         """
         Performs an analysis of the frequency of the words used in the
         wiki articles collected by the --count-words argument over multiple
-        code runs and, if the --chart argument was given, visualizes the
-        finding using a bar chart
+        code runs and if the --chart argument was given visualizes the
+        findings using a bar chart.
         """
 
         # collecting the most common words in the wiki language
@@ -283,8 +332,8 @@ class Controller:
         comparison_list = []
         comparison_headers = [
             "Word",
-            "Frequency in the article",
-            "Frequency in the wiki language"
+            "Frequency in article",
+            "Frequency in wiki language"
         ]
 
         if self.args.mode == "article":
@@ -344,10 +393,26 @@ class Controller:
                         ]
                     )
         
+        # creating a comparison DataFrame with pandas
         df = pd.DataFrame(
             comparison_list,
             columns=comparison_headers
         )
+
+        df["Frequency in article"] = pd.to_numeric(
+            df["Frequency in article"],
+            errors="coerce"
+        )
+
+        df["Frequency in wiki language"] = pd.to_numeric(
+            df["Frequency in wiki language"],
+            errors="coerce"
+        )
+        
+        print(df)
+        # creating a file with a bar chart in the root directory
+        if self.args.chart:
+            self._create_bar_chart(df)
 
 
     def auto_count_words(self):

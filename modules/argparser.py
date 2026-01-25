@@ -1,7 +1,12 @@
 from assets.arg_classes import Args
 from assets.errors import ArgValidationError
 
+import os
 
+
+"""
+Validates arguments given through the command line or manually.
+"""
 class WikiParser():
     def __init__(self, args: Args):
         self.args = args
@@ -23,21 +28,26 @@ class WikiParser():
         ]
 
         if not any(functionalities):
-            raise ArgValidationError("""No functionalities chosen,
-                                        use --h for help""")
+            raise ArgValidationError(
+                "No functionalities chosen, use --h for help"
+            )
 
         arg_table = self.args.table is not None
         arg_number = self.args.number is not None
         arg_header = self.args.first_row_is_header is not None
 
         if (arg_table and not arg_number) or (arg_number and not arg_table):
-            raise ArgValidationError("""--table and --number arguments 
-                                        are codependent, use both""")
+            raise ArgValidationError(
+                "--table and --number arguments are codependent, use both"
+            )
 
         if arg_header and not (arg_table):
-            raise ArgValidationError("""The --first-row-is-header argument
-                                        needs the --table and --number
-                                        arguments to be valid""")
+            raise ArgValidationError(
+                "The --first-row-is-header argument requires\n"
+                "   --table and\n"
+                "   --number\n"
+                "arguments to be valid"
+            )
 
         arg_rw = self.args.analyze_relative_word_fq is not None
         arg_mode = self.args.mode is not None
@@ -48,22 +58,43 @@ class WikiParser():
         is_not_empty_rw_argument = not all([arg_rw, arg_mode, arg_count])
 
         if is_empty_rw_argument and is_not_empty_rw_argument:
-            raise ArgValidationError("""The arguments
-                                        --analyze-relative-word-frequency
-                                        --mode and --count
-                                        are codependent, use all of them""")
+            raise ArgValidationError(
+                "The arguments:\n"
+                "   --analyze-relative-word-frequency\n"
+                "   --mode\n"
+                "   --count\n"
+                "are codependent, use all of them"
+            )
 
         if arg_chart and not arg_rw:
-            raise ArgValidationError("""The --chart argument needs the
-                                        --analyze-relative-word-frequency,
-                                        --mode and --count arguments to
-                                        exist and be valid""")
+            raise ArgValidationError(
+                "The --chart argument requiers the:\n"
+                "   --analyze-relative-word-frequency\n"
+                "   --mode\n"
+                "   --count\n"
+                "arguments to be valid"
+            )
 
         if not self.args.mode in [None, "article", "language"]:
-            raise ArgValidationError("""The --mode argument's value
-                                        is incorrect.
-                                        Make sure it's either 'article'
-                                        or 'language'.""")
+            raise ArgValidationError(
+                "The --mode argument's value is incorrect.\n"
+                "Make sure it's either 'article' or 'language'."
+            )
+
+        if self.args.chart:
+            chart_path = self.args.chart
+
+            # for the os library to read the path correctly
+            if chart_path[0] != "/":
+                chart_path = "/" + chart_path
+
+            chart_dir_path = os.path.split(chart_path)[0]
+
+            if not os.path.exists(chart_dir_path):
+                raise ArgValidationError(
+                    "The --chart argument's value is incorrect.\n"
+                    "Make sure it points to an existing directory."
+                )
 
         arg_acw = self.args.auto_count_words
         arg_depth = self.args.depth
@@ -73,9 +104,13 @@ class WikiParser():
         is_not_empty_acw_argument = not all([arg_acw, arg_depth, arg_wait])
 
         if is_empty_acw_argument and is_not_empty_acw_argument:
-            raise ArgValidationError("""The arguments --auto-count-words,
-                                        --depth and --wait are codependent,
-                                        use all of them""")
+            raise ArgValidationError(
+                "The arguments:\n"
+                "   --auto-count-words\n"
+                "   --depth\n"
+                "   --wait\n"
+                "are codependent, use all of them"
+            )
 
 
     def parse_args(self):
