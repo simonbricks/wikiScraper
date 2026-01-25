@@ -42,7 +42,5 @@ def test_summary_module():
     if creature_stage_summary in content:
         assert True
     else:
-        print(len(creature_stage_summary))
-        print(len(content))
         assert False
 

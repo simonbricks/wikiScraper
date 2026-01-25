@@ -49,7 +49,7 @@ def collect_cmd_args() -> Args:
                         help='reference point of the analysis')
 
     parser.add_argument('--count',
-                        type=str,
+                        type=int,
                         metavar='NUMBER',
                         help='how many words from the wiki will be compared')
 

@@ -33,11 +33,15 @@ class Scraper:
 
         if self.use_local_html:  # taking the source code from a local file
             root_dir = Path.cwd()
-            html_files = list(root_dir.glob(f"{self.search_phrase}.html"))
+            html_files = list(root_dir.glob(f"*.html"))
 
             if not html_files:
                 raise HTMLFileError("""No HTML file found in the 
                                        root directory of the project.""")
+
+            if len(html_files) > 1:
+                raise HTMLFileError("""There are too many HTML files
+                                       in the root directory.""")
 
             page_text = html_files[0].read_text(encoding="utf-8")
 

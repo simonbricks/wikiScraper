@@ -5,9 +5,17 @@ from modules.scraper import Scraper
 
 import csv
 import json
-import time  # for using time.sleep() only
+import time  # for time.sleep()
+
+import numpy as np
+import pandas as pd
+
+from wordfreq import top_n_list, word_frequency
 
 
+# how many of the most common words in the wiki's language to analyze
+NUM_MOST_COMMON_LANG_WORDS = 1000
+WIKI_LANG = "en"
 SPORE_FANDOM_URL = "https://spore.fandom.com/" 
 
 
@@ -80,7 +88,8 @@ class Controller:
             return word
 
 
-    def _get_page_contents(self, wiki_url: str, search_phrase: str):
+    def _get_page_contents(self, wiki_url: str, search_phrase: str,
+                           use_local_html_file: bool = False):
         """
         Returns a BeautifulSoup of the
         article contents of the searched wiki page.
@@ -88,7 +97,8 @@ class Controller:
 
         scraper = Scraper(
             wiki_url=wiki_url,
-            search_phrase=search_phrase
+            search_phrase=search_phrase,
+            use_local_html_file_instead=use_local_html_file
         )
         page_html = scraper.scrape()
 
@@ -99,16 +109,22 @@ class Controller:
         return cleaned_content
 
 
-    def summarize(self):
+    def summarize(self, use_local_html_file: bool = False):
         """
         Module responsible for the --summary functionality,
         downloads the wiki page source code and returns its summary.
         """
-
-        soup = self._get_page_contents(
-            wiki_url=SPORE_FANDOM_URL,
-            search_phrase=self.args.summary
-        )
+        if use_local_html_file:  # for the integration test
+            soup = self._get_page_contents(
+                wiki_url=SPORE_FANDOM_URL,
+                search_phrase="test phrase",
+                use_local_html_file=use_local_html_file
+            )
+        else:  # if used through the controller run() function
+            soup = self._get_page_contents(
+                wiki_url=SPORE_FANDOM_URL,
+                search_phrase=self.args.summary
+            )
 
         first_p = soup.find("p")
         summary_text = first_p.text.strip('\n')  # unnecessary indents
@@ -141,15 +157,11 @@ class Controller:
 
         # printing out the table so that it's readable
 
-        header_row = []
+        cols = []
+
         for table_header in examined_table.find_all("th"):
             # collecting all header items
-            header_row.append(table_header.text.strip())
-            print(table_header.text.strip(), end=" | ")
-
-        table_contents.append(header_row)
-
-        print()
+            cols.append(table_header.text.strip())
 
         for t_row in examined_table.find_all("tr")[1:]:
             # collecting all other table items
@@ -160,9 +172,16 @@ class Controller:
             if (columns):
                 for item in columns:
                     table_row.append(item.text.strip())
-                    print(item.text.strip(), end=" | ")
                 table_contents.append(table_row)
-                print()
+        
+        # creating a pandas DataFrame so that the table looks better
+        df = pd.DataFrame(
+            np.array(table_contents),
+            columns=cols
+        )
+
+        # setting up the first column of the table as an index
+        df.set_index(df.columns[0], inplace=True)
         
         # writing the table contents to a .csv file
         with open(f"{self.args.table}.csv", "w", encoding="utf-8") as f:
@@ -182,12 +201,12 @@ class Controller:
         if page_url:  # used in the auto_count_words() function
             soup = self._get_page_contents(
                 wiki_url=SPORE_FANDOM_URL,
-                search_phrase=page_url
+                search_phrase=page_url,
             )
         else:
             soup = self._get_page_contents(
                 wiki_url=SPORE_FANDOM_URL,
-                search_phrase=self.args.count_words
+                search_phrase=self.args.count_words,
             )
 
         # counting words and saving them to the .json file
@@ -226,7 +245,109 @@ class Controller:
 
 
     def analyze_relative_word_fq(self):
-        pass
+        """
+        Performs an analysis of the frequency of the words used in the
+        wiki articles collected by the --count-words argument over multiple
+        code runs and, if the --chart argument was given, visualizes the
+        finding using a bar chart
+        """
+
+        # collecting the most common words in the wiki language
+        top_lang_words = top_n_list(WIKI_LANG, NUM_MOST_COMMON_LANG_WORDS)
+
+        # collecting the list of the frequency of the words on the wiki
+        try:
+            f = open("word-counts.json", "r")
+            file_contents = f.read()
+
+            if file_contents:
+                wiki_words = json.loads(file_contents)
+        except FileNotFoundError:
+            f = open("word-counts.json", "w")
+
+            print("""File word-counts.json does not exist, 
+                     so the word frequency analysis can't be performed""")
+            return  # the lack of a file shouldn't result in an error
+        
+        sum_of_word_count = sum(wiki_words.values())
+
+        most_common_lang_word_fq = word_frequency(
+            top_lang_words[0],
+            WIKI_LANG
+        )
+
+        # the number of rows of the comparison table
+        rows_no = self.args.count
+
+        # list of blocks of values to collect for the comparison table
+        comparison_list = []
+        comparison_headers = [
+            "Word",
+            "Frequency in the article",
+            "Frequency in the wiki language"
+        ]
+
+        if self.args.mode == "article":
+            # turning the wiki word count dictionary to a list
+            wiki_words_list = list(wiki_words.items())
+
+            # sorting the list by the number of apperances
+            wiki_words_list_sorted = sorted(
+                wiki_words_list,
+                key=lambda tup: tup[1],
+                reverse=True  # to maintain descending order
+            )
+
+            n_most_common_wiki_words = wiki_words_list_sorted[:rows_no]
+
+            for item in n_most_common_wiki_words:
+                word = item[0]
+
+                if not word in top_lang_words:
+                    comparison_list.append(
+                        [
+                            word,
+                            wiki_words[word] / sum_of_word_count,
+                            np.nan
+                        ]
+                    )
+                else:
+                    lang_word_fq = word_frequency(word, WIKI_LANG)
+                    comparison_list.append(
+                        [
+                            word,
+                            wiki_words[word] / sum_of_word_count,
+                            word_frequency(word, WIKI_LANG)
+                        ]
+                    )
+            comparison_list = np.array(comparison_list)
+
+        else:  # self.args.mode == "language"
+            n_most_common_lang_words = top_lang_words[:rows_no]
+
+            for word in n_most_common_lang_words:
+                # the word is in the collected wiki words
+                if not word in wiki_words.keys():
+                    comparison_list.append(
+                        [
+                            word,
+                            np.nan,
+                            word_frequency(word, WIKI_LANG)
+                        ]
+                    )
+                else:
+                    comparison_list.append(
+                        [
+                            word,
+                            wiki_words[word] / sum_of_word_count,
+                            word_frequency(word, WIKI_LANG)
+                        ]
+                    )
+        
+        df = pd.DataFrame(
+            comparison_list,
+            columns=comparison_headers
+        )
 
 
     def auto_count_words(self):
