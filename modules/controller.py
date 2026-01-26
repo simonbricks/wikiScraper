@@ -118,7 +118,7 @@ class Controller:
         if use_local_html_file:  # for the integration test
             soup = self._get_page_contents(
                 wiki_url=SPORE_FANDOM_URL,
-                search_phrase="test phrase",
+                search_phrase=self.args.summary,
                 use_local_html_file=use_local_html_file
             )
         else:  # if used through the controller run() function
@@ -130,8 +130,7 @@ class Controller:
         first_p = soup.find("p")
         summary_text = first_p.text.strip('\n')  # unnecessary indents
 
-        print(summary_text)
-        return summary_text  # for testing
+        return summary_text
 
 
     def save_table(self):
@@ -156,8 +155,6 @@ class Controller:
         
         table_contents = []
 
-        # printing out the table so that it's readable
-
         cols = []
 
         for table_header in examined_table.find_all("th"):
@@ -181,8 +178,6 @@ class Controller:
             columns=cols
         )
 
-        print(df)
-
         # setting up the first column of the table as an index
         df.set_index(df.columns[0], inplace=True)
         
@@ -190,6 +185,8 @@ class Controller:
         with open(f"{self.args.table}.csv", "w", encoding="utf-8") as f:
             writer = csv.writer(f)
             writer.writerows(table_contents)
+
+        return df
 
 
     def count_words(self, page_url: str = None):
@@ -314,8 +311,10 @@ class Controller:
         except FileNotFoundError:
             f = open("word-counts.json", "w")
 
-            print("""File word-counts.json does not exist, 
-                     so the word frequency analysis can't be performed""")
+            print("""
+                File word-counts.json does not exist, 
+                so the word frequency analysis can't be performed
+            """)
             return  # the lack of a file shouldn't result in an error
         
         sum_of_word_count = sum(wiki_words.values())
@@ -408,11 +407,12 @@ class Controller:
             df["Frequency in wiki language"],
             errors="coerce"
         )
-        
-        print(df)
+
         # creating a file with a bar chart in the root directory
         if self.args.chart:
             self._create_bar_chart(df)
+
+        return df
 
 
     def auto_count_words(self):
@@ -455,16 +455,16 @@ class Controller:
         """
 
         if self.args.summary:
-            self.summarize()
+            print(self.summarize())
 
         if self.args.table:
-            self.save_table()
+            print(self.save_table())
         
         if self.args.count_words:
             self.count_words()
 
         if self.args.analyze_relative_word_fq:
-            self.analyze_relative_word_fq()
+            print(self.analyze_relative_word_fq())
 
         if self.args.auto_count_words:
             self.auto_count_words()

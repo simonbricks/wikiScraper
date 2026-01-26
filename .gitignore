@@ -14,3 +14,6 @@ env/
 # Ignore all .csv and .json files
 *.csv
 *.json
+
+# Ignore all bar graph .png files
+*.png

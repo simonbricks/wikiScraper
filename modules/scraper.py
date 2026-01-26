@@ -33,21 +33,25 @@ class Scraper:
 
         if self.use_local_html:  # taking the source code from a local file
             root_dir = Path.cwd()
-            html_files = list(root_dir.glob(f"*.html"))
+            html_files = list(root_dir.glob(f"{self.search_phrase}.html"))
 
             if not html_files:
-                raise HTMLFileError("""No HTML file found in the 
-                                       root directory of the project.""")
+                raise HTMLFileError(
+                    "No HTML file of the search_phrase filename found"
+                    "in the root directory of the project."
+                )
 
             if len(html_files) > 1:
-                raise HTMLFileError("""There are too many HTML files
-                                       in the root directory.""")
+                raise HTMLFileError(
+                    "There are too many HTML files in the root directory."
+                )
 
             page_text = html_files[0].read_text(encoding="utf-8")
 
             if not page_text.strip():  # HTML file is empty
-                raise HTMLFileError("""The HTML file with
-                                       page contents is empty.""")
+                raise HTMLFileError(
+                    "The HTML file with page contents is empty."
+                )
 
             soup = BeautifulSoup(page_text, "html.parser")
 
@@ -61,8 +65,9 @@ class Scraper:
 
             # there isn't a wiki page for this search phrase
             if soup.find("div", attrs={"class": "noarticletext"}):
-                raise PageValidationError(f"""The wiki page for the search
-                                              phrase {self.search_phrase}
-                                              doesn't exist.""")    
+                raise PageValidationError(
+                    f"The wiki page for the search phrase"
+                    "{self.search_phrase} doesn't exist."
+                )    
     
         return page_text
