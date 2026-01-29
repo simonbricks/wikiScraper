@@ -37,7 +37,7 @@ class Scraper:
 
             if not html_files:
                 raise HTMLFileError(
-                    "No HTML file of the search_phrase filename found"
+                    "No HTML file of the search_phrase filename found\n"
                     "in the root directory of the project."
                 )
 
@@ -66,8 +66,9 @@ class Scraper:
             # there isn't a wiki page for this search phrase
             if soup.find("div", attrs={"class": "noarticletext"}):
                 raise PageValidationError(
-                    f"The wiki page for the search phrase"
-                    "{self.search_phrase} doesn't exist."
+                    f"The wiki page for the search phrase:\n"
+                    "{self.search_phrase}\n"
+                    "doesn't exist."
                 )    
     
         return page_text

@@ -9,8 +9,8 @@ An integration test for the --summary module that reads from the
 'cell_stage_page.html' file contained in the 'tests' package
 """
 def main():
-    # getting contents from the test wiki page .html file
-    with open("tests/cell_stage_page.html", "r") as f:
+    # getting contents from the test wiki page .txt file
+    with open("tests/cell_stage_page.txt", "r") as f:
         html = f.read()
     
     # saving the contents to a temporary file in rootdir

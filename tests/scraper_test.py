@@ -8,7 +8,8 @@ from assets.errors import ArgValidationError, PageValidationError
 from assets.errors import HTMLFileError
 
 
-SPORE_FANDOM_URL = "https://spore.fandom.com/wiki/" 
+SPORE_FANDOM_URL = "https://spore.fandom.com/wiki/"
+USE_ONLINE_TESTS = False
 
 
 def test_no_file():
@@ -70,31 +71,33 @@ def test_valid_file():
 
     os.remove("test_file.html")
 
-def test_nonexistent_page():
-    scraper = Scraper(
-        wiki_url=SPORE_FANDOM_URL,
-        search_phrase="nonexistent page"
-    )
 
-    try:
-        scraper.scrape()
-        assert False
-    except PageValidationError:
-        assert True
+if USE_ONLINE_TESTS:
+    def test_nonexistent_page():
+        scraper = Scraper(
+            wiki_url=SPORE_FANDOM_URL,
+            search_phrase="nonexistent page"
+        )
+
+        try:
+            scraper.scrape()
+            assert False
+        except PageValidationError:
+            assert True
 
 
-def test_valid_page():
-    scraper = Scraper(
-        wiki_url=SPORE_FANDOM_URL,
-        search_phrase="Cell_stage"
-    )
+    def test_valid_page():
+        scraper = Scraper(
+            wiki_url=SPORE_FANDOM_URL,
+            search_phrase="Cell_stage"
+        )
 
-    try:
-        html_text = scraper.scrape()
-    except Exception:
-        assert False
-    
-    if html_text:
-        assert True
-    else:
-        assert False
+        try:
+            html_text = scraper.scrape()
+        except Exception:
+            assert False
+        
+        if html_text:
+            assert True
+        else:
+            assert False
