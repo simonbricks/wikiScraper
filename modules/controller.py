@@ -74,19 +74,29 @@ class Controller:
         from the word.
         """
 
-        if word.isalnum():
-            return word
-        
-        else:
-            chars_to_delete = []
+        special_letters = [
+            "ä", "ö", "ü", "ß",
+            "ñ",
+            "ç", "é", "è",
+            "ł", "ą", "ę", "ó", "ś", "ć", "ż", "ź", "ń"
+        ]
 
-            for char in word:
-                if not char.isalnum() and not char in chars_to_delete:
-                    chars_to_delete.append(char)
-            
-            for char in chars_to_delete:
-                word = word.replace(char, "")
+        if word.isalpha():
             return word
+
+        chars_to_delete = []
+
+        for char in word:
+            if char.lower() in special_letters:
+                continue
+
+            if not char.isalpha() and not char in chars_to_delete:
+                chars_to_delete.append(char)
+        
+        for char in chars_to_delete:
+            word = word.replace(char, "")
+
+        return word
 
 
     def _get_page_contents(self, wiki_url: str, search_phrase: str,
@@ -189,7 +199,7 @@ class Controller:
         return df
 
 
-    def count_words(self, page_url: str = None):
+    def count_words(self, page_url: str = None, save_to_json: bool = True) -> dict:
         """
         Counts words in a given wiki article,
         and keeps track of their count over many runs
@@ -233,15 +243,17 @@ class Controller:
         for word in list_of_words:
             word = self._clean_up_word(word)  # removes ',' and other symbols
 
-            if word.lower() in word_count:
+            if word and word.lower() in word_count:
                 word_count[word.lower()] += 1
             else:
                 word_count[word.lower()] = 1
         
-        word_count_json = json.dumps(word_count)
-        
-        with open("word-counts.json", "w") as f:
-            f.write(word_count_json)
+        if save_to_json:
+            word_count_json = json.dumps(word_count)
+            
+            with open("word-counts.json", "w") as f:
+                f.write(word_count_json)
+        return word_count
 
 
     def _create_bar_chart(self, df: pd.DataFrame):
