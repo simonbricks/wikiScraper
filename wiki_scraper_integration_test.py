@@ -4,11 +4,12 @@ from assets.arg_classes import SummaryTableArgs, Args
 import os
 
 
-"""
-An integration test for the --summary module that reads from the
-'cell_stage_page.html' file contained in the 'tests' package
-"""
 def main():
+    """
+    An integration test for the --summary module that reads from the
+    'cell_stage_page.html' file contained in the 'tests' package
+    """
+
     # getting contents from the test wiki page .txt file
     with open("tests/cell_stage_page.txt", "r") as f:
         html = f.read()

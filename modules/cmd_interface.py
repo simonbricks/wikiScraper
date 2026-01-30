@@ -6,8 +6,8 @@ from assets.arg_classes import FreqWordArgs, SummaryTableArgs, WordCountArgs
 
 def collect_cmd_args() -> Args:
     """
-    Collects the command line arguments from the run instance of wiki_scraper.py
-    and places then inside a general Args object.
+    Collects the command line arguments from the run instance of 
+    wiki_scraper.py and places then inside a general Args object.
     """
     
     parser = argparse.ArgumentParser(

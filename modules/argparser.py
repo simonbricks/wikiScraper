@@ -4,14 +4,15 @@ from assets.errors import ArgValidationError
 import os
 
 
-"""
-Validates arguments given through the command line or manually.
-"""
 class WikiParser():
+    """
+    Validates arguments given through the command line or manually.
+    """
+    
     def __init__(self, args: Args):
         self.args = args
 
-    
+
     def _validate_args(self):
         """
         Checks and confirms that the gathered command-line arguments
@@ -75,7 +76,7 @@ class WikiParser():
                 "arguments to be valid"
             )
 
-        if not self.args.mode in [None, "article", "language"]:
+        if self.args.mode not in [None, "article", "language"]:
             raise ArgValidationError(
                 "The --mode argument's value is incorrect.\n"
                 "Make sure it's either 'article' or 'language'."

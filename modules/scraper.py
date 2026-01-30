@@ -5,6 +5,7 @@ from pathlib import Path
 
 from assets.errors import PageValidationError, HTMLFileError
 
+
 class Scraper:
     """
     Collects source code of a wiki search phrase page,
@@ -66,8 +67,8 @@ class Scraper:
             # there isn't a wiki page for this search phrase
             if soup.find("div", attrs={"class": "noarticletext"}):
                 raise PageValidationError(
-                    f"The wiki page for the search phrase:\n"
-                    "{self.search_phrase}\n"
+                    "The wiki page for the search phrase:\n"
+                    f"{self.search_phrase}\n"
                     "doesn't exist."
                 )    
     

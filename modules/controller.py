@@ -1,5 +1,5 @@
 from assets.arg_classes import Args
-from bs4 import BeautifulSoup, NavigableString, Tag
+from bs4 import BeautifulSoup
 
 from modules.scraper import Scraper
 
@@ -26,7 +26,7 @@ class Controller:
     and realizes the project functionalities in accordance with them.
     """
 
-    def __init__(self, args : Args):
+    def __init__(self, args: Args):
         self.args = args
 
 
@@ -90,7 +90,7 @@ class Controller:
             if char.lower() in special_letters:
                 continue
 
-            if not char.isalpha() and not char in chars_to_delete:
+            if not char.isalpha() and char not in chars_to_delete:
                 chars_to_delete.append(char)
         
         for char in chars_to_delete:
@@ -199,7 +199,7 @@ class Controller:
         return df
 
 
-    def count_words(self, page_url: str = None, save_to_json: bool = True) -> dict:
+    def count_words(self, page_url: str = None, save_to_json: bool = True):
         """
         Counts words in a given wiki article,
         and keeps track of their count over many runs
@@ -331,11 +331,6 @@ class Controller:
         
         sum_of_word_count = sum(wiki_words.values())
 
-        most_common_lang_word_fq = word_frequency(
-            top_lang_words[0],
-            WIKI_LANG
-        )
-
         # the number of rows of the comparison table
         rows_no = self.args.count
 
@@ -363,7 +358,7 @@ class Controller:
             for item in n_most_common_wiki_words:
                 word = item[0]
 
-                if not word in top_lang_words:
+                if word not in top_lang_words:
                     comparison_list.append(
                         [
                             word,
@@ -372,7 +367,6 @@ class Controller:
                         ]
                     )
                 else:
-                    lang_word_fq = word_frequency(word, WIKI_LANG)
                     comparison_list.append(
                         [
                             word,
@@ -387,7 +381,7 @@ class Controller:
 
             for word in n_most_common_lang_words:
                 # the word is in the collected wiki words
-                if not word in wiki_words.keys():
+                if word not in wiki_words.keys():
                     comparison_list.append(
                         [
                             word,

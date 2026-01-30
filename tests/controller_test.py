@@ -1,8 +1,6 @@
-import pytest
-
 from modules.controller import Controller
 from assets.arg_classes import Args
-from assets.arg_classes import SummaryTableArgs, WordCountArgs, FreqWordArgs
+from assets.arg_classes import SummaryTableArgs
 
 
 USE_ONLINE_TESTS = False
@@ -47,4 +45,3 @@ if USE_ONLINE_TESTS:
             assert True
         else:
             assert False
-

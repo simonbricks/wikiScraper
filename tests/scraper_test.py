@@ -1,10 +1,9 @@
 # unit tests on the functionality of the scraper.py module
 
-import pytest
 import os
 
 from modules.scraper import Scraper
-from assets.errors import ArgValidationError, PageValidationError
+from assets.errors import PageValidationError
 from assets.errors import HTMLFileError
 
 
@@ -28,6 +27,7 @@ def test_no_file():
 
 def test_empty_file():
     file = open("awwkward.html", "w")
+    file.write(" ")
 
     scraper = Scraper(
         wiki_url=SPORE_FANDOM_URL,

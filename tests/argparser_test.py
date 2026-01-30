@@ -1,7 +1,5 @@
 # unit tests on the functionality of the wiki_argparser.py module
 
-import pytest
-
 from modules.argparser import WikiParser
 from assets.arg_classes import Args
 from assets.arg_classes import SummaryTableArgs, FreqWordArgs, WordCountArgs
