@@ -23,9 +23,13 @@ class Article:
         Returns the summary of the article.
         """
 
-        first_p = self.soup.find("p")
-        summary_text = first_p.text.strip('\n')  # unnecessary indents
+        first_p = None
 
+        for p in self.soup.find_all("p", recursive=False):
+            if p.get_text(strip=True):
+                first_p = p
+                break
+        summary_text = first_p.text.strip('\n')  # unnecessary indents
         return summary_text
 
 
