@@ -104,6 +104,27 @@ class Controller:
             writer = csv.writer(f)
             writer.writerows(table_contents)
 
+        word_count = {}
+
+        # printing out the word counts of the table contents
+        for row in table_contents:
+            for cell in row:
+                for word in cell.split():
+                    word = self._clean_up_word(word)
+
+                    if word and word.lower() in word_count:
+                        word_count[word.lower()] += 1
+                    elif word:
+                        word_count[word.lower()] = 1
+        word_count_df = pd.DataFrame(
+            word_count.items(),
+            columns=["Word", "Number of apperances"],
+        )
+        word_count_df = word_count_df.set_index("Word")
+
+        print(df, end="\n\n")
+        print(word_count_df)
+
         return df
 
 
@@ -357,7 +378,7 @@ class Controller:
             print(self.summarize())
 
         if self.args.table:
-            print(self.save_table())
+            self.save_table()
         
         if self.args.count_words:
             self.count_words()
