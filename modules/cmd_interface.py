@@ -66,11 +66,13 @@ def collect_cmd_args() -> Args:
 
     parser.add_argument('--depth',
                         type=int,
+                        metavar='NUMBER',
                         help='''max depth of analyzed pages
                                 from the starting one''')
 
     parser.add_argument('--wait',
-                        type=int,
+                        type=float,
+                        metavar='FLOAT',
                         help='seconds to wait between --count-words')
 
     args = parser.parse_args()

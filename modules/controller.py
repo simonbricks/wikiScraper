@@ -1,7 +1,7 @@
 from assets.arg_classes import Args
 from bs4 import BeautifulSoup
 
-from modules.scraper import Scraper
+from modules.article_parser import Article
 
 import csv
 import json
@@ -28,44 +28,6 @@ class Controller:
 
     def __init__(self, args: Args):
         self.args = args
-
-
-    def _clean_up_soup(self, soup: BeautifulSoup) -> BeautifulSoup:
-        """
-        Removes unnecessary content from the wiki page soup.
-        """
-        
-        cleaned_soup = soup
-
-        # getting rid of the infobox
-        infobox = soup.find("aside", attrs={"class": "portable-infobox"})
-
-        if infobox:
-            infobox.extract()
-
-        # getting rid of the table of contents
-        toc = soup.find("div", attrs={"id": "toc"})
-
-        if toc:
-            toc.extract()
-
-        # getting rid of the navbox at the bottom of the page 
-        # and everything after
-        navbox = soup.find("table", attrs={"class": "va-navbox-border"})
-
-        if navbox:
-            after_navbox = navbox.find_all_next()
-        else:
-            after_navbox = None
-
-        if after_navbox:
-            for item_tag in after_navbox:
-                item_tag.extract()
-
-        if navbox:
-            navbox.extract()
-
-        return cleaned_soup
 
 
     def _clean_up_word(self, word: str) -> str:
@@ -99,48 +61,18 @@ class Controller:
         return word
 
 
-    def _get_page_contents(self, wiki_url: str, search_phrase: str,
-                           use_local_html_file: bool = False):
-        """
-        Returns a BeautifulSoup of the
-        article contents of the searched wiki page.
-        """
-
-        scraper = Scraper(
-            wiki_url=wiki_url,
-            search_phrase=search_phrase,
-            use_local_html_file_instead=use_local_html_file
-        )
-        page_html = scraper.scrape()
-
-        soup = BeautifulSoup(page_html, "html.parser")
-        content = soup.find("div", attrs={"class": "mw-content-ltr"})
-        cleaned_content = self._clean_up_soup(content)
-
-        return cleaned_content
-
-
     def summarize(self, use_local_html_file: bool = False):
         """
         Module responsible for the --summary functionality,
         downloads the wiki page source code and returns its summary.
         """
-        if use_local_html_file:  # for the integration test
-            soup = self._get_page_contents(
-                wiki_url=SPORE_FANDOM_URL,
-                search_phrase=self.args.summary,
-                use_local_html_file=use_local_html_file
-            )
-        else:  # if used through the controller run() function
-            soup = self._get_page_contents(
-                wiki_url=SPORE_FANDOM_URL,
-                search_phrase=self.args.summary
-            )
-
-        first_p = soup.find("p")
-        summary_text = first_p.text.strip('\n')  # unnecessary indents
-
-        return summary_text
+        article = Article(
+            wiki_url=SPORE_FANDOM_URL,
+            search_phrase=self.args.summary,
+            use_local_html_file_instead=use_local_html_file
+        )
+        article_summary = article.get_summary()
+        return article_summary
 
 
     def save_table(self):
@@ -152,35 +84,11 @@ class Controller:
         search phrase.
         """
 
-        soup = self._get_page_contents(
+        article = Article(
             wiki_url=SPORE_FANDOM_URL,
             search_phrase=self.args.table
         )
-
-        # picking up all the tables concerning the wikipage content
-        all_tables = soup.find_all("table", attrs={"class": "wikitable"})
-
-        # we add one here, because the indexing starts from 0
-        examined_table = all_tables[self.args.number - 1]
-        
-        table_contents = []
-
-        cols = []
-
-        for table_header in examined_table.find_all("th"):
-            # collecting all header items
-            cols.append(table_header.text.strip())
-
-        for t_row in examined_table.find_all("tr")[1:]:
-            # collecting all other table items
-            table_row = []
-            # the first tr is the header, so we skip it
-            columns = t_row.find_all("td")
-
-            if (columns):
-                for item in columns:
-                    table_row.append(item.text.strip())
-                table_contents.append(table_row)
+        table_contents, cols = article.get_table(self.args.number)
         
         # creating a pandas DataFrame so that the table looks better
         df = pd.DataFrame(
@@ -208,16 +116,18 @@ class Controller:
         page_url is an optional argument used in auto_count_words() function.
         """
 
-        if page_url:  # used in the auto_count_words() function
-            soup = self._get_page_contents(
+        if page_url: # used in the auto_count_words() function
+            article = Article(
                 wiki_url=SPORE_FANDOM_URL,
-                search_phrase=page_url,
+                search_phrase=page_url
             )
         else:
-            soup = self._get_page_contents(
+            article = Article(
                 wiki_url=SPORE_FANDOM_URL,
                 search_phrase=self.args.count_words,
             )
+
+        list_of_words = article.get_wordlist()
 
         # counting words and saving them to the .json file
         word_count = {}
@@ -230,15 +140,6 @@ class Controller:
                 word_count = json.loads(file_contents)
         except FileNotFoundError:
             f = open("word-counts.json", "w")  # creating an empty file
-
-        if word_count:
-            word_count["times_ran"] += 1
-        else:
-            word_count = {
-                "times_ran": 1
-            }
-        
-        list_of_words = soup.text.split()
 
         for word in list_of_words:
             word = self._clean_up_word(word)  # removes ',' and other symbols
@@ -297,7 +198,7 @@ class Controller:
 
         plt.ylabel("Frequency", fontweight="bold")
         plt.title("Frequency comparison for words")
-        plt.legend()
+        plt.legend(loc="upper right")
 
         plt.savefig(self.args.chart, bbox_inches="tight")
 
@@ -359,21 +260,17 @@ class Controller:
                 word = item[0]
 
                 if word not in top_lang_words:
-                    comparison_list.append(
-                        [
+                    comparison_list.append([
                             word,
                             wiki_words[word] / sum_of_word_count,
                             np.nan
-                        ]
-                    )
+                    ])
                 else:
-                    comparison_list.append(
-                        [
+                    comparison_list.append([
                             word,
                             wiki_words[word] / sum_of_word_count,
                             word_frequency(word, WIKI_LANG)
-                        ]
-                    )
+                    ])
             comparison_list = np.array(comparison_list)
 
         else:  # self.args.mode == "language"
@@ -382,21 +279,17 @@ class Controller:
             for word in n_most_common_lang_words:
                 # the word is in the collected wiki words
                 if word not in wiki_words.keys():
-                    comparison_list.append(
-                        [
+                    comparison_list.append([
                             word,
                             np.nan,
                             word_frequency(word, WIKI_LANG)
-                        ]
-                    )
+                    ])
                 else:
-                    comparison_list.append(
-                        [
+                    comparison_list.append([
                             word,
                             wiki_words[word] / sum_of_word_count,
                             word_frequency(word, WIKI_LANG)
-                        ]
-                    )
+                    ])
         
         # creating a comparison DataFrame with pandas
         df = pd.DataFrame(
@@ -437,13 +330,13 @@ class Controller:
             if page_dfs[1] > self.args.depth:
                 break
             
-            soup = self._get_page_contents(
+            article = Article(
                 wiki_url=SPORE_FANDOM_URL,
                 search_phrase=page_dfs[0]
             )
             self.count_words(page_dfs[0])
 
-            all_links = soup.find_all("a")
+            all_links = article.get_links()
 
             for link in all_links:
                 # looking for only the wiki article pages

@@ -49,6 +49,11 @@ class WikiParser():
                 "   --number\n"
                 "arguments to be valid"
             )
+        
+        if arg_number and self.args.number <= 0:
+            raise ArgValidationError(
+                "The --number argument's value must be positive."
+            )
 
         arg_rw = self.args.analyze_relative_word_fq is not None
         arg_mode = self.args.mode is not None
@@ -82,6 +87,11 @@ class WikiParser():
                 "Make sure it's either 'article' or 'language'."
             )
 
+        if arg_count and self.args.count <= 0:
+            raise ArgValidationError(
+                "The --count argument's value must be positive."
+            )
+
         if self.args.chart:
             chart_path = self.args.chart
 
@@ -111,6 +121,16 @@ class WikiParser():
                 "   --depth\n"
                 "   --wait\n"
                 "are codependent, use all of them"
+            )
+
+        if arg_depth and self.args.depth < 0:
+            raise ArgValidationError(
+                "The --depth value must be non-negative."
+            )
+        
+        if arg_wait and self.args.wait <= 0:
+            raise ArgValidationError(
+                "The --wait value must be positive."
             )
 
 

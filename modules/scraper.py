@@ -21,6 +21,44 @@ class Scraper:
         self.use_local_html = use_local_html_file_instead
 
 
+    def _clean_up_soup(self, soup: BeautifulSoup) -> BeautifulSoup:
+        """
+        Removes unnecessary content from the wiki page soup.
+        """
+        
+        cleaned_soup = soup
+
+        # getting rid of the infobox
+        infobox = soup.find("aside", attrs={"class": "portable-infobox"})
+
+        if infobox:
+            infobox.extract()
+
+        # getting rid of the table of contents
+        toc = soup.find("div", attrs={"id": "toc"})
+
+        if toc:
+            toc.extract()
+
+        # getting rid of the navbox at the bottom of the page 
+        # and everything after
+        navbox = soup.find("table", attrs={"class": "va-navbox-border"})
+
+        if navbox:
+            after_navbox = navbox.find_all_next()
+        else:
+            after_navbox = None
+
+        if after_navbox:
+            for item_tag in after_navbox:
+                item_tag.extract()
+
+        if navbox:
+            navbox.extract()
+
+        return cleaned_soup
+
+
     def scrape(self) -> str:
         """
         Scrapes wiki page's source code
@@ -73,3 +111,17 @@ class Scraper:
                 )    
     
         return page_text
+
+
+    def get_page_contents(self):
+        """
+        Returns a BeautifulSoup of the
+        article contents of the searched wiki page.
+        """
+        page_html = self.scrape()
+
+        soup = BeautifulSoup(page_html, "html.parser")
+        content = soup.find("div", attrs={"class": "mw-content-ltr"})
+        cleaned_content = self._clean_up_soup(content)
+
+        return cleaned_content
